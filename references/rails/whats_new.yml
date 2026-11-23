@@ -1,0 +1,23 @@
+# What's New. Newest first; within one date the order here is the order shown.
+# Each entry ships in the same PR as its feature. See the whats-new skill.
+#
+#   date:        ship date
+#   title:       a few words; also names the screenshots folder (parameterized)
+#   body:        1-3 sentences on what you can now do
+#   audience:    who may read it, no wider than the feature's own gate
+#   href:        the page the feature lives on
+#   highlight:   the data-whats-new="<key>" tag on that page
+#   example:     optional; the app swaps href for a real record that shows the feature
+#   prs:         PR numbers (shown to admins)
+#   screenshots: optional; webp files in config/whats_new/screenshots/<title-key>/, each with alt
+
+entries:
+  - date: 2026-01-01
+    title: What's New
+    body: >-
+      This page lists what shipped, newest first. Click Show me on any entry to jump straight to
+      the feature.
+    audience: everyone
+    href: /whats-new
+    highlight: whats-new-menu
+    prs: []

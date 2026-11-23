@@ -1,0 +1,21 @@
+/* What a What's New link landed on. An inset outline: it can't shift layout
+   or get clipped by an overflow-hidden parent. Swap the color for the app's
+   accent (a CSS variable keeps it right in dark mode). */
+.whats-new-highlight {
+  outline: 3px solid #f59e0b;
+  outline-offset: -3px;
+  border-radius: 0.5rem;
+  animation: whats-new-pulse 1.2s ease-in-out 4;
+}
+
+@keyframes whats-new-pulse {
+  50% {
+    outline-color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .whats-new-highlight {
+    animation: none;
+  }
+}
