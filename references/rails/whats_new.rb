@@ -12,6 +12,10 @@
 # href is the page (or the fallback when `example` resolves to nothing), and
 # highlight is a data-whats-new key on that page.
 #
+# Every entry with PRs credits whoever landed them: landed_by holds GitHub
+# logins, and `landers:` in the same file maps each to the name the page shows
+# ("Landed by Mona"), to every reader. PR links themselves stay admin-only.
+#
 # Screenshots live in config/whats_new/screenshots/<entry key>/, outside
 # public/, and WhatsNewController#screenshot serves them behind the entry's own
 # check, so an image can't reach someone the entry is hidden from.
@@ -56,7 +60,7 @@ class WhatsNew
     def phone? = width.present? && height.present? && height > width
   end
 
-  Entry = Data.define(:date, :title, :body, :audience, :href, :highlight, :example, :prs, :key, :screenshots) do
+  Entry = Data.define(:date, :title, :body, :audience, :href, :highlight, :example, :prs, :landed_by, :key, :screenshots) do
     def self.from(attrs)
       attrs = attrs.to_h.transform_keys(&:to_sym)
       label = attrs[:title].inspect
@@ -67,12 +71,21 @@ class WhatsNew
         raise ArgumentError, "#{label}: #{field} is required" if attrs[field].blank?
       end
 
+      # Who merged the PRs. A login with no name under `landers:` raises rather
+      # than showing a bare handle.
+      landers = WhatsNew.landers
+      logins = Array(attrs[:landed_by]).map(&:to_s)
+      raise ArgumentError, "#{label}: landed_by is required with prs" if Array(attrs[:prs]).any? && logins.empty?
+      strangers = logins - landers.keys
+      raise ArgumentError, "#{label}: no name under landers: for #{strangers.join(", ")}" if strangers.any?
+
       # The screenshots folder's name: the title, apostrophes dropped.
       key = attrs.fetch(:title).to_s.delete("'").parameterize
       screenshots = Array(attrs[:screenshots]).map { |shot| WhatsNew::Screenshot.from(shot, key: key) }
       new(date: attrs.fetch(:date).to_s, title: attrs.fetch(:title), body: attrs.fetch(:body),
           audience: attrs[:audience], href: attrs[:href], highlight: attrs[:highlight],
-          example: attrs[:example], prs: Array(attrs[:prs]), key: key, screenshots: screenshots)
+          example: attrs[:example], prs: Array(attrs[:prs]),
+          landed_by: logins.map { |login| landers.fetch(login) }.uniq, key: key, screenshots: screenshots)
     end
 
     def visible_to?(role:)
@@ -90,6 +103,8 @@ class WhatsNew
     def as_page_json(example_href: nil, show_prs: false)
       {
         date: date, title: title, body: body, href: link(example_href),
+        # Names only, so every reader sees the credit; PR links stay admin-only.
+        landed_by: landed_by,
         screenshots: screenshots.map do |shot|
           { src: "/whats-new/screenshots/#{key}/#{shot.file}?v=#{shot.version}", alt: shot.alt,
             width: shot.width, height: shot.height, phone: shot.phone? }
@@ -101,7 +116,16 @@ class WhatsNew
 
   # Loaded once; the file only changes with a deploy.
   def self.all
-    @all ||= newest_first(YAML.safe_load_file(PATH, permitted_classes: [ Date ]).fetch("entries").map { |attrs| Entry.from(attrs) }).freeze
+    @all ||= newest_first(file.fetch("entries").map { |attrs| Entry.from(attrs) }).freeze
+  end
+
+  # GitHub login => the name credited for landing a PR.
+  def self.landers
+    @landers ||= (file["landers"] || {}).to_h { |login, name| [ login.to_s, name.to_s ] }.freeze
+  end
+
+  def self.file
+    @file ||= YAML.safe_load_file(PATH, permitted_classes: [ Date ]).freeze
   end
 
   # Within a date the file's order stands, so the biggest news can lead.

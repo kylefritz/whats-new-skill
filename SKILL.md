@@ -43,6 +43,7 @@ entries:
     href: /reports
     highlight: csv-export
     prs: [ 606 ]
+    landed_by: [ octocat ]
     screenshots:
       - file: export-button.webp
         alt: "The Export button in the table's bottom bar"
@@ -81,8 +82,13 @@ entries:
 5. **Date and order.** `date` is the ship date. New entries go at the top. Within one date the
    file's order stands, so put the biggest news first.
 
-6. **PRs.** The number exists once the PR is open: open it, add `prs: [ N ]`, push again. Show PR
-   links only to people who can open the repo (admins, if the repo is private).
+6. **PRs, and who landed them.** The number exists once the PR is open: open it, add `prs: [ N ]`
+   and `landed_by: [ <github login> ]`, push again. `landed_by` credits whoever merges the PR; the
+   session that lands it is the one running `gh`, so `gh api user -q .login` gives it (for an
+   older PR, `gh pr view N --json mergedBy -q .mergedBy.login`). Each login needs a name under
+   `landers:` at the bottom of the YAML; add one for a new collaborator. The page shows "Landed by
+   Mona" to every reader, while PR links go only to people who can open the repo (admins, if the
+   repo is private).
 
 7. **Screenshots: the best few from the PR.** See the next section.
 

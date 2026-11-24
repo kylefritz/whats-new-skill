@@ -19,6 +19,9 @@ carries the best screenshots from the PR.
   (pairs well with [pr-screenshot-skill](https://github.com/kylefritz/pr-screenshot-skill)),
   converts them to WebP and checks each against the entry's audience. They are served by a
   controller behind the entry's own check, never from `public/`.
+- **Credit for who landed it.** Each entry names whoever merged its PRs ("Landed by Mona"),
+  shown to every reader. GitHub logins go in `landed_by`, and a `landers:` map turns them into
+  names; PR links themselves stay admin-only.
 - **As private as the feature.** Every entry has an audience copied from the feature's own gate.
   An unknown audience fails to load instead of defaulting open, and filtering is on the server.
 - **Tests keep it honest.** Every `highlight` must be tagged somewhere in the frontend, every

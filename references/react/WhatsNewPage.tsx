@@ -21,6 +21,15 @@ export interface WhatsNewEntry {
   screenshots: WhatsNewScreenshot[]
   /** Empty unless the reader may open the repo. */
   prs: { number: number; url: string }[]
+  /** Who merged the PRs, by name. Every reader sees it. */
+  landed_by: string[]
+}
+
+/** "Landed by Mona", "Landed by Mona & Hubot", "Landed by Mona, Hubot & Octavia". */
+export function landedByLine(names: string[]): string | null {
+  if (names.length === 0) return null
+  if (names.length === 1) return `Landed by ${names[0]}`
+  return `Landed by ${names.slice(0, -1).join(", ")} & ${names[names.length - 1]}`
 }
 
 function formatDate(date: string): string {
@@ -113,6 +122,9 @@ export default function WhatsNewPage({ entries }: { entries: WhatsNewEntry[] }) 
                     <Link href={entry.href} className="text-sm font-medium text-amber-700 hover:text-amber-800">
                       Show me
                     </Link>
+                    {landedByLine(entry.landed_by) && (
+                      <span className="text-xs text-gray-500">{landedByLine(entry.landed_by)}</span>
+                    )}
                     {entry.prs.map((pr) => (
                       <a key={pr.number} href={pr.url} target="_blank" rel="noreferrer" className="text-xs text-gray-500 hover:text-gray-700">
                         PR #{pr.number}

@@ -9,6 +9,8 @@
 #   highlight:   the data-whats-new="<key>" tag on that page
 #   example:     optional; the app swaps href for a real record that shows the feature
 #   prs:         PR numbers (shown to admins)
+#   landed_by:   GitHub logins of whoever merged the PRs; required with prs. Each needs a
+#                name under landers: below. Shown to everyone as "Landed by <name>".
 #   screenshots: optional; webp files in config/whats_new/screenshots/<title-key>/, each with alt
 
 entries:
@@ -21,3 +23,7 @@ entries:
     href: /whats-new
     highlight: whats-new-menu
     prs: []
+
+# GitHub login => the name the page credits for landing a PR.
+landers:
+  octocat: Mona

@@ -1,4 +1,5 @@
 require "test_helper"
+require "minitest/mock"
 
 # The checks that keep What's New honest: a bad entry fails CI, not the page.
 class WhatsNewTest < ActiveSupport::TestCase
@@ -55,6 +56,19 @@ class WhatsNewTest < ActiveSupport::TestCase
 
   test "an example replaces the href and keeps the key" do
     assert_equal "/invoices/7?whats_new=csv-export", entry.link("/invoices/7")
+  end
+
+  test "whoever landed the PRs is credited by name, once each, to every reader" do
+    WhatsNew.stub(:landers, { "octocat" => "Mona", "hubot" => "Hubot" }) do
+      shared = entry(prs: [ 1, 2, 3 ], landed_by: %w[octocat hubot octocat])
+      assert_equal %w[Mona Hubot], shared.as_page_json[:landed_by]
+      assert_raises(ArgumentError) { entry(prs: [ 1 ]) }
+      assert_raises(ArgumentError) { entry(prs: [ 1 ], landed_by: [ "stranger" ]) }
+    end
+  end
+
+  test "every entry in the file with PRs names who landed them" do
+    WhatsNew.all.select { |e| e.prs.any? }.each { |e| assert_not_empty e.landed_by, e.title }
   end
 
   # The file itself
